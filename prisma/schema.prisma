@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Definindo o modelo para Jogador
+model Player {
+  id          Int       @id @default(autoincrement())
+  name        String
+  age         Int
+  position    String
+  nationality String
+  teams       PlayerTeam[]
+}
+
+// Definindo o modelo para Time
+model Team {
+  id             Int       @id @default(autoincrement())
+  name           String
+  foundationYear Int
+  country        String
+  coach          String
+  players        PlayerTeam[]   // Adicionando o campo de relação oposto
+  homeMatches    Match[] @relation("homeTeam")  // Adicionando o campo de relação oposto
+  awayMatches    Match[] @relation("awayTeam")  // Adicionando o campo de relação oposto
+}
+
+// Definindo o modelo para Partida
+model Match {
+  id            Int     @id @default(autoincrement())
+  date          String
+  location      String
+  score         String?
+  homeTeamId    Int
+  awayTeamId    Int
+  homeTeam      Team    @relation("homeTeam", fields: [homeTeamId], references: [id])
+  awayTeam      Team    @relation("awayTeam", fields: [awayTeamId], references: [id])
+}
+
+// Definindo o relacionamento de jogador com time (Muitos-para-Muitos)
+model PlayerTeam {
+  id       Int    @id @default(autoincrement())
+  playerId Int
+  teamId   Int
+  player   Player @relation(fields: [playerId], references: [id])
+  team     Team   @relation(fields: [teamId], references: [id])
+}
